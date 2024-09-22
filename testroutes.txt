@@ -1,0 +1,44 @@
+# Postman Test URLs
+
+## Events
+
+- GET all events: `GET http://localhost:3000/api/events`
+- GET specific event: `GET http://localhost:3000/api/events/:id`
+- CREATE new event: `POST http://localhost:3000/api/events`
+- UPDATE event: `PATCH http://localhost:3000/api/events/:id`
+- DELETE event: `DELETE http://localhost:3000/api/events/:id`
+
+## Users
+
+- GET all users: `GET http://localhost:3000/api/users`
+- GET specific user: `GET http://localhost:3000/api/users/:id`
+- CREATE new user: `POST http://localhost:3000/api/users`
+- UPDATE user: `PATCH http://localhost:3000/api/users/:id`
+- DELETE user: `DELETE http://localhost:3000/api/users/:id`
+
+## Issues
+
+- GET all issues: `GET http://localhost:3000/api/issues`
+- GET specific issue: `GET http://localhost:3000/api/issues/:id`
+- CREATE new issue: `POST http://localhost:3000/api/issues`
+- UPDATE issue: `PATCH http://localhost:3000/api/issues/:id`
+- DELETE issue: `DELETE http://localhost:3000/api/issues/:id`
+
+## Forums
+
+- GET all forum posts: `GET http://localhost:3000/api/forums`
+- GET specific forum post: `GET http://localhost:3000/api/forums/:id`
+- CREATE new forum post: `POST http://localhost:3000/api/forums`
+- UPDATE forum post: `PATCH http://localhost:3000/api/forums/:id`
+- DELETE forum post: `DELETE http://localhost:3000/api/forums/:id`
+
+## Points
+
+- GET all points transactions: `GET http://localhost:3000/api/points`
+- GET specific points transaction: `GET http://localhost:3000/api/points/:id`
+- CREATE new points transaction: `POST http://localhost:3000/api/points`
+- UPDATE points transaction: `PATCH http://localhost:3000/api/points/:id`
+- DELETE points transaction: `DELETE http://localhost:3000/api/points/:id`
+
+Remember to replace `:id` with an actual ID when testing specific item operations.
+
