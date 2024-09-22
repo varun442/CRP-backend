@@ -29,7 +29,7 @@ const eventSchema = new mongoose.Schema({
   }],
   type: {
     type: String,
-    enum: ['town_hall', 'community_event', 'volunteer_opportunity'],
+    enum: ['town_hall', 'community_event', 'volunteer_opportunity', 'other'],
     required: true
   },
   status: {

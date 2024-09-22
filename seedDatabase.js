@@ -46,11 +46,17 @@ const seedDatabase = async () => {
     // Seed Events
     const eventTypes = ['town_hall', 'community_event', 'volunteer_opportunity'];
     const eventStatus = ['upcoming', 'ongoing', 'completed'];
-    for (let i = 0; i < 10; i++) {
+    // Function to generate a random date in September 2024
+const getRandomSeptemberDate = () => {
+  const start = new Date(2024, 8, 1); // September 1, 2024 (month is 0-indexed)
+  const end = new Date(2024, 9, 30); // September 30, 2024
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+};
+    for (let i = 0; i < 20; i++) {
       const event = new Event({
         title: `Event ${i}`,
         description: `Description for Event ${i}`,
-        date: new Date(Date.now() + Math.random() * 10000000000),
+        date: getRandomSeptemberDate(),
         location: `Location ${i}`,
         organizer: users[Math.floor(Math.random() * users.length)]._id,
         attendees: users.slice(0, Math.floor(Math.random() * users.length)).map(user => user._id),
