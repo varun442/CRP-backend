@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, )
+mongoose.connect(process.env.MONGODB_URI )
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.log('MongoDB connection error:', err));
 
@@ -20,6 +20,7 @@ const eventRoutes = require('./routes/events');
 const userRoutes = require('./routes/users');
 const issueRoutes = require('./routes/issues');
 const forumRoutes = require('./routes/forums');
+const recognitionRoutes = require('./routes/recognition');
 const pointsRoutes = require('./routes/points');
 
 // Use routes
@@ -27,6 +28,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/issues', issueRoutes);
 app.use('/api/forums', forumRoutes);
+app.use('/api/recognition', recognitionRoutes);
 app.use('/api/points', pointsRoutes);
 
 app.get('/', (req, res) => {
