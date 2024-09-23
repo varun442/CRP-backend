@@ -1,4 +1,4 @@
-# Community Restoration Project API
+# Community Restoration Project Backend API
 
 This project is a RESTful API for a Community Restoration Project, built with Node.js, Express, and MongoDB.
 
