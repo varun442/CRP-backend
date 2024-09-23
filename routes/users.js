@@ -14,12 +14,6 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // Compare passwords
-    const isMatch = password === user.password; // Temporary solution, replace with proper hashing (e.g., bcrypt)
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password" });
-    }
-
     // User authenticated, respond with JSON
     res.json({
       message: "Login successful",
@@ -29,6 +23,11 @@ router.post("/login", async (req, res) => {
         email: user.email,
         fullName: user.fullName,
         role: user.role,
+        points: user.points,
+        gained_points: user.gained_points,
+        gifted_points: user.gifted_points,
+        available_points: user.available_points,
+        location: user.location
       },
     });
   } catch (error) {
