@@ -36,6 +36,18 @@ const userSchema = new mongoose.Schema({
   points: {
     type: Number,
     default: 0
+  },
+  gained_points: {
+    type: Number,
+    default: 0
+  },
+  gifted_points: {
+    type: Number,
+    default: 0
+  },
+  available_points: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true

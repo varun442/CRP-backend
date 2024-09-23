@@ -1,70 +1,82 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { faker } = require('@faker-js/faker');
+
 require('dotenv').config();
 
 // Import models
-
 const Event = require('./models/Event');
 const User = require('./models/User');
 const Issue = require('./models/Issue');
 const Forum = require('./models/Forum');
-const Points = require('./models/Points');
+const Recognition = require('./models/Recognition');
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected for seeding'))
   .catch(err => console.error('MongoDB connection error:', err));
 
+const clearDatabase = async () => {
+  const collections = mongoose.connection.collections;
+  for (const key in collections) {
+    const collection = collections[key];
+    await collection.deleteMany({});
+  }
+  console.log('All collections have been cleared.');
+};
+
 const seedDatabase = async () => {
   try {
     // Clear existing data
-    await User.deleteMany();
-    await Event.deleteMany();
-    await Issue.deleteMany();
-    await Forum.deleteMany();
-    await Points.deleteMany();
+    await clearDatabase();
 
     // Seed Users
     const users = [];
-    for (let i = 0; i < 10; i++) {
+    const roles = ['admin', 'staff', 'staff', ...Array(47).fill('resident')];
+    for (let i = 0; i < 50; i++) {
       const user = new User({
-        username: `user${i}`,
-        email: `user${i}@example.com`,
+        username: faker.internet.userName(),
+        email: faker.internet.email(),
         password: await bcrypt.hash('password123', 10),
-        fullName: `User ${i}`,
+        fullName: faker.person.fullName(),
         location: {
-          address: `${i} Main St`,
-          city: 'Anytown',
-          state: 'ST',
-          zipCode: '12345'
+          address: faker.location.streetAddress(),
+          city: faker.location.city(),
+          state: faker.location.state(),
+          zipCode: faker.location.zipCode()
         },
-        role: i === 0 ? 'admin' : i < 3 ? 'staff' : 'resident',
-        points: Math.floor(Math.random() * 1000)
+        role: roles[i],
+        points: faker.number.int({ min: 0, max: 500 }),
+        gained_points: 0,
+        gifted_points: 0,
+        available_points: 0
       });
       users.push(await user.save());
     }
 
     // Seed Events
-    const eventTypes = ['town_hall', 'community_event', 'volunteer_opportunity'];
-    const eventStatus = ['upcoming', 'ongoing', 'completed'];
-    // Function to generate a random date in September 2024
-const getRandomSeptemberDate = () => {
-  const start = new Date(2024, 8, 1); // September 1, 2024 (month is 0-indexed)
-  const end = new Date(2024, 9, 30); // September 30, 2024
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-};
-    for (let i = 0; i < 20; i++) {
+    const eventTypes = ['town_hall', 'community_event', 'volunteer_opportunity', 'other'];
+    const approvalStatus = ['pending', 'approved', 'rejected'];
+
+    for (let i = 0; i < 50; i++) {
+      const eventDate = faker.date.between({ from: '2024-09-01', to: '2024-09-01'});
+      const eventApprovalStatus = approvalStatus[Math.floor(Math.random() * approvalStatus.length)];
+      const eventStatusValue = eventDate < new Date() ? 'completed' : 'upcoming';
+
       const event = new Event({
-        title: `Event ${i}`,
-        description: `Description for Event ${i}`,
-        date: getRandomSeptemberDate(),
-        location: `Location ${i}`,
+        title: faker.company.catchPhrase(),
+        description: faker.lorem.paragraph(),
+        date: eventDate,
+        location: `${faker.location.streetAddress()}, ${faker.location.city()}, ${faker.location.state()} ${faker.location.zipCode()}`,
         organizer: users[Math.floor(Math.random() * users.length)]._id,
         attendees: users.slice(0, Math.floor(Math.random() * users.length)).map(user => user._id),
         type: eventTypes[Math.floor(Math.random() * eventTypes.length)],
-        status: eventStatus[Math.floor(Math.random() * eventStatus.length)],
-        maxAttendees: Math.floor(Math.random() * 50) + 10,
-        pointsReward: Math.floor(Math.random() * 100)
+        status: eventStatusValue,
+        maxAttendees: faker.number.int({ min: 20, max: 100 }),
+        pointsReward: faker.number.int({ min: 50, max: 200 }),
+        approvalStatus: eventApprovalStatus,
+        rejectionReason: eventApprovalStatus === 'rejected' ? faker.lorem.sentence() : null
       });
+
       await event.save();
     }
 
@@ -73,50 +85,74 @@ const getRandomSeptemberDate = () => {
     const issuePriority = ['low', 'medium', 'high'];
     for (let i = 0; i < 10; i++) {
       const issue = new Issue({
-        title: `Issue ${i}`,
-        description: `Description for Issue ${i}`,
-        location: `Location ${i}`,
+        title: faker.lorem.words(3),
+        description: faker.lorem.sentences(),
+        location: faker.address.streetAddress(),
         reporter: users[Math.floor(Math.random() * users.length)]._id,
         status: issueStatus[Math.floor(Math.random() * issueStatus.length)],
         priority: issuePriority[Math.floor(Math.random() * issuePriority.length)],
         volunteers: users.slice(0, Math.floor(Math.random() * users.length)).map(user => user._id),
-        pointsReward: Math.floor(Math.random() * 50)
+        pointsReward: faker.number.int({ min: 10, max: 50 })
       });
       await issue.save();
     }
 
     // Seed Forum Posts
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 50; i++) {
       const forumPost = new Forum({
-        title: `Forum Post ${i}`,
-        content: `Content for Forum Post ${i}`,
+        title: faker.lorem.words(3),
+        content: faker.lorem.paragraphs(),
         author: users[Math.floor(Math.random() * users.length)]._id,
         likes: users.slice(0, Math.floor(Math.random() * users.length)).map(user => user._id),
         comments: [
           {
             author: users[Math.floor(Math.random() * users.length)]._id,
-            content: `Comment on Post ${i}`,
+            content: faker.lorem.sentence(),
             likes: users.slice(0, Math.floor(Math.random() * users.length)).map(user => user._id)
           }
         ],
-        tags: [`tag${i}`, `category${i}`]
+        tags: faker.lorem.words(2).split(' ')
       });
       await forumPost.save();
     }
 
-    // Seed Points Transactions
-    const transactionReasons = ['event_attendance', 'volunteer_work', 'forum_participation', 'issue_resolution'];
-    for (let i = 0; i < 10; i++) {
-      const pointsTransaction = new Points({
-        user: users[Math.floor(Math.random() * users.length)]._id,
-        amount: Math.floor(Math.random() * 100),
-        reason: transactionReasons[Math.floor(Math.random() * transactionReasons.length)],
-        description: `Transaction ${i} description`
+    // Seed Recognition Data
+    const recognitionCategories = ['Helpfulness', 'Leadership', 'Innovation', 'Teamwork', 'Community Spirit'];
+    
+    for (let i = 0; i < 100; i++) {
+      const fromUser = users[Math.floor(Math.random() * users.length)];
+      let toUser;
+      do {
+        toUser = users[Math.floor(Math.random() * users.length)];
+      } while (toUser._id.equals(fromUser._id));
+
+      const recognition = new Recognition({
+        fromUserId: fromUser._id,
+        toUserId: toUser._id,
+        message: `${fromUser.fullName} recognizes ${toUser.fullName} for their ${faker.lorem.words(3)}.`,
+        category: recognitionCategories[Math.floor(Math.random() * recognitionCategories.length)],
+        points: faker.number.int({ min: 10, max: 50 }),
+        date: faker.date.recent(30)
       });
-      await pointsTransaction.save();
+
+      await recognition.save();
+
+      // Update the recipient's points
+      await User.findByIdAndUpdate(toUser._id, {
+        $inc: {
+          points: recognition.points,
+          gained_points: recognition.points,
+          available_points: recognition.points
+        }
+      });
+
+      // Update the giver's gifted_points
+      await User.findByIdAndUpdate(fromUser._id, {
+        $inc: { gifted_points: recognition.points }
+      });
     }
 
-    console.log('Database seeded successfully');
+    console.log('Database seeded successfully with fake realistic data.');
     mongoose.connection.close();
   } catch (error) {
     console.error('Error seeding database:', error);

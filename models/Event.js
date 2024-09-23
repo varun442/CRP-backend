@@ -34,8 +34,8 @@ const eventSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['upcoming', 'ongoing', 'completed'],
-    default: 'upcoming'
+    enum: ['pending', 'approved', 'rejected', 'upcoming', 'ongoing', 'completed'],
+    default: 'pending'
   },
   maxAttendees: {
     type: Number,
@@ -44,6 +44,15 @@ const eventSchema = new mongoose.Schema({
   pointsReward: {
     type: Number,
     default: 0
+  },
+  approvalStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  rejectionReason: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

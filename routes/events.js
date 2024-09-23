@@ -1,80 +1,100 @@
 const express = require('express');
 const router = express.Router();
-
 const Event = require('../models/Event');
-const User = require('../models/User');
-const Issue = require('../models/Issue');
-const Forum = require('../models/Forum');
-const Points = require('../models/Points');
 
-
-// Event Routes
-// Create a new event
+// Create a new event (sets status to pending)
 router.post('/', async (req, res) => {
-    console.log('Received request body:', req.body);
-    try {
-      const event = new Event(req.body);
-      console.log('Created event object:', event);
-      await event.save();
-      res.status(201).send(event);
-    } catch (error) {
-      console.error('Error creating event:', error);
-      if (error.name === 'ValidationError') {
-        const errors = Object.values(error.errors).map(err => err.message);
-        return res.status(400).json({ errors });
-      }
-      res.status(500).send('Server error');
-    }
-  });
+  try {
+    const newEvent = new Event({
+      ...req.body,
+      approvalStatus: 'pending',
+      status: 'upcoming'
+    });
+    await newEvent.save();
+    res.status(201).json({ message: 'Event created and pending approval', event: newEvent });
+  } catch (error) {
+    res.status(400).json({ message: 'Error creating event', error: error.message });
+  }
+});
 
-// Get all events
+// Get all events (for regular users - only approved and upcoming/ongoing events)
 router.get('/', async (req, res) => {
   try {
-    const events = await Event.find();
-    res.send(events);
+    const events = await Event.find({ 
+      approvalStatus: 'approved', 
+    });
+    res.json(events);
   } catch (error) {
     res.status(500).send(error);
   }
 });
 
-// Get a specific event
-router.get('/:id', async (req, res) => {
+// Get all pending events (for admin dashboard)
+router.get('/pending', async (req, res) => {
+  try {
+    const pendingEvents = await Event.find({ approvalStatus: 'pending' });
+    res.json(pendingEvents);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching pending events', error: error.message });
+  }
+});
+
+router.get('/rejected', async (req, res) => {
+  try {
+    const approvedEvents = await Event.find({ approvalStatus: 'rejected' });
+    res.json(approvedEvents);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching rejected events', error: error.message });
+  }
+});
+
+router.get('/approved', async (req, res) => {
+  try {
+    const approvedEvents = await Event.find({ approvalStatus: 'approved' });
+    res.json(approvedEvents);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching approved events', error: error.message });
+  }
+});
+
+// Approve an event
+router.post('/approve/:id', async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
     if (!event) {
-      return res.status(404).send();
+      return res.status(404).json({ message: 'Event not found' });
     }
-    res.send(event);
+    
+    event.approvalStatus = 'approved';
+    await event.save();
+    
+    res.json({ message: 'Event approved successfully', event });
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({ message: 'Error approving event', error: error.message });
   }
 });
 
-// Update an event
-router.patch('/:id', async (req, res) => {
+// Reject an event
+router.post('/reject/:id', async (req, res) => {
   try {
-    const event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!event) {
-      return res.status(404).send();
+    const { rejectionReason } = req.body;
+    if (!rejectionReason) {
+      return res.status(400).json({ message: 'Rejection reason is required' });
     }
-    res.send(event);
+
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    
+    event.approvalStatus = 'rejected';
+    event.rejectionReason = rejectionReason;
+    await event.save();
+    
+    res.json({ message: 'Event rejected successfully', event });
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).json({ message: 'Error rejecting event', error: error.message });
   }
 });
-
-// Delete an event
-router.delete('/:id', async (req, res) => {
-  try {
-    const event = await Event.findByIdAndDelete(req.params.id);
-    if (!event) {
-      return res.status(404).send();
-    }
-    res.send(event);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
-
 
 module.exports = router;
