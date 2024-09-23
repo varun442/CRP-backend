@@ -156,4 +156,27 @@ router.delete("/users/:id", async (req, res) => {
   }
 });
 
+router.get('/points/all/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+
+    const pointsData = {
+      points: user.points,
+      gained_points: user.gained_points,
+      gifted_points: user.gifted_points,
+      available_points: user.available_points
+    };
+
+    res.send(pointsData);
+  } catch (error) {
+    res.status(500).send({ message: 'Server error', error: error.message });
+  }
+});
+
+
 module.exports = router;
